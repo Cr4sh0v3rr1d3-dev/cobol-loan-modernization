@@ -1,0 +1,13 @@
+# Hooks locales de pre-commit. Instalar con:
+#   pip install pre-commit
+#   pre-commit install
+#
+# El hook de gitleaks acá corre en cada commit local, ANTES de que el mismo
+# check corra en CI (.github/workflows/ci.yml) como required status check.
+# Esto es defensa en capas: pre-commit atrapa el secreto antes de que llegue
+# siquiera a un push; CI es la barrera que no se puede saltear con --no-verify.
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1 # versión estable más reciente confirmada vía GitHub API al momento de escribir esto
+    hooks:
+      - id: gitleaks

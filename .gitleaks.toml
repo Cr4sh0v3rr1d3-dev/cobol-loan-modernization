@@ -1,0 +1,31 @@
+# Configuración de gitleaks para cobol-loan-modernization.
+# Extiende la config default de gitleaks (reglas estándar de detección de
+# secretos) y agrega solo lo específico de este repo.
+title = "gitleaks-config-cobol-loan-modernization"
+
+[extend]
+useDefault = true
+
+# Allowlist: mantener MÍNIMA a propósito. No se permite un allowlist amplio
+# por path completo — cada entrada tiene que estar justificada acá mismo.
+#
+# Convención para fixtures de test futuras: si se agregan credenciales
+# falsas en archivos de test (ej. api/src/test/...), marcarlas con el
+# literal `EXAMPLE_KEY_DO_NOT_USE` (o `EXAMPLE_SECRET_DO_NOT_USE` para
+# passwords) en el mismo valor, y agregar una regex acá que matchee
+# específicamente ese literal — nunca el path del archivo entero, porque
+# eso taparía un secreto real que se cuele en el mismo archivo.
+#
+# Todavía no hay fixtures reales en el repo (recién arranca), así que el
+# allowlist queda vacío. Ejemplo de cómo se vería cuando aparezcan:
+#
+# [[rules]]
+# id = "test-fixture-example-key"
+# description = "Placeholder de fixture de test, nunca un secreto real"
+# regex = '''EXAMPLE_(KEY|SECRET)_DO_NOT_USE'''
+# [allowlist]
+# regexes = ['''EXAMPLE_(KEY|SECRET)_DO_NOT_USE''']
+#
+# Sin allowlist todavía: gitleaks rechaza un bloque [allowlist] vacío
+# ("must contain at least one check"), así que directamente no se declara
+# hasta que haga falta una excepción real.

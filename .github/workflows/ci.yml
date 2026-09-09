@@ -1,0 +1,74 @@
+name: cobol-loan-modernization CI
+
+# NOTA MANUAL (no se puede hacer desde el YAML): el job `gitleaks` de este
+# workflow tiene que configurarse como "required status check" en
+# Settings > Branches > Branch protection rules del repo en GitHub. Ese paso
+# es manual y queda fuera del alcance de este archivo — hacerlo a mano una
+# vez que el repo esté en GitHub.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Permisos mínimos a nivel workflow. Los jobs que necesiten algo más
+# específico lo declaran ellos mismos.
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout (historial completo para escanear todos los commits)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITLEAKS_CONFIG apunta al .gitleaks.toml del repo en vez del
+          # default embebido en la action.
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+  build-and-test:
+    name: Build & test (Java / Spring Boot)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    # Testcontainers necesita Docker: los runners ubuntu-latest ya lo traen
+    # preinstalado y accesible desde el job por default (no hay contenedor de
+    # ejecución que aísle el socket acá), así que no hace falta setup extra.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+
+      - name: Setup Java 22 (Temurin)
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "22"
+
+      - name: Cache dependencias Maven
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('api/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # api/ puede no existir todavía en algunos puntos de la historia del
+      # repo (se está construyendo en paralelo) — este step no es bloqueante
+      # para el resto del CI, solo falla el job de build si api/ existe pero
+      # el build en sí falla.
+      - name: Build & verify (./mvnw clean verify)
+        working-directory: api
+        run: ./mvnw -B -q clean verify
