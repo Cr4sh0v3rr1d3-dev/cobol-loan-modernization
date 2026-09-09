@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 790" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrowJson" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#1d6fb8"/>
+    </marker>
+    <marker id="arrowLine" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#c2650a"/>
+    </marker>
+    <marker id="arrowSql" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#4b7f3f"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1000" height="790" fill="#ffffff"/>
+
+  <text x="500" y="30" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1a1a">
+    cobol-loan-modernization — flujo real de POST /api/v1/prestamos/simular
+  </text>
+
+  <!-- ===== Boxes ===== -->
+
+  <!-- Cliente -->
+  <rect x="390" y="34" width="220" height="76" rx="10" fill="#f4f4f4" stroke="#888" stroke-width="1.5"/>
+  <text x="500" y="62" text-anchor="middle" font-size="15" font-weight="600" fill="#1a1a1a">Cliente HTTP</text>
+  <text x="500" y="81" text-anchor="middle" font-size="12" fill="#555">consumidor de la API</text>
+
+  <!-- Spring Boot -->
+  <rect x="380" y="300" width="240" height="110" rx="10" fill="#fff3e0" stroke="#c2650a" stroke-width="2"/>
+  <text x="500" y="330" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a1a">Spring Boot (api/)</text>
+  <text x="500" y="351" text-anchor="middle" font-size="12" fill="#555">orquestador — sin lógica</text>
+  <text x="500" y="367" text-anchor="middle" font-size="12" fill="#555">de cálculo, solo coordina</text>
+  <text x="500" y="386" text-anchor="middle" font-size="10.5" fill="#888">PrestamoController → PrestamoSimulacionService</text>
+
+  <!-- Postgres -->
+  <rect x="760" y="300" width="210" height="100" rx="10" fill="#eef6ea" stroke="#4b7f3f" stroke-width="1.5"/>
+  <text x="865" y="330" text-anchor="middle" font-size="15" font-weight="600" fill="#1a1a1a">PostgreSQL</text>
+  <text x="865" y="350" text-anchor="middle" font-size="12" fill="#555">tabla tasas_bancarias</text>
+  <text x="865" y="369" text-anchor="middle" font-size="11" fill="#888">banco, producto → tna</text>
+  <text x="865" y="385" text-anchor="middle" font-size="11" fill="#888">(ej. 61.000)</text>
+
+  <!-- COBOL -->
+  <rect x="380" y="560" width="240" height="110" rx="10" fill="#eaf1fb" stroke="#1d6fb8" stroke-width="2"/>
+  <text x="500" y="592" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a1a">simloan (COBOL)</text>
+  <text x="500" y="613" text-anchor="middle" font-size="12" fill="#555">motor de cálculo puro,</text>
+  <text x="500" y="629" text-anchor="middle" font-size="12" fill="#555">sistema francés — sin acceso a datos</text>
+  <text x="500" y="648" text-anchor="middle" font-size="10.5" fill="#888">GnuCOBOL 3.2 compilado desde fuente</text>
+
+  <!-- ===== Arrows: Cliente <-> Spring Boot ===== -->
+  <line x1="470" y1="110" x2="470" y2="298" stroke="#1d6fb8" stroke-width="2.5" marker-end="url(#arrowJson)"/>
+  <line x1="530" y1="298" x2="530" y2="110" stroke="#1d6fb8" stroke-width="2.5" stroke-dasharray="6,5" marker-end="url(#arrowJson)"/>
+
+  <rect x="60" y="150" width="330" height="56" rx="6" fill="#eaf1fb" stroke="#1d6fb8" stroke-width="1"/>
+  <text x="225" y="169" text-anchor="middle" font-size="12" font-weight="700" fill="#0d3d63">① POST — JSON</text>
+  <text x="225" y="187" text-anchor="middle" font-size="10.5" fill="#0d3d63">{banco, producto, montoSolicitado,</text>
+  <text x="225" y="200" text-anchor="middle" font-size="10.5" fill="#0d3d63">plazoMeses}</text>
+
+  <rect x="610" y="150" width="330" height="56" rx="6" fill="#eaf1fb" stroke="#1d6fb8" stroke-width="1"/>
+  <text x="775" y="169" text-anchor="middle" font-size="12" font-weight="700" fill="#0d3d63">⑥ HTTP 200 — JSON</text>
+  <text x="775" y="187" text-anchor="middle" font-size="10.5" fill="#0d3d63">{cuotaMensual, totalAPagar,</text>
+  <text x="775" y="200" text-anchor="middle" font-size="10.5" fill="#0d3d63">totalIntereses, ...}</text>
+
+  <!-- ===== Arrows: Spring Boot <-> Postgres ===== -->
+  <line x1="622" y1="335" x2="758" y2="335" stroke="#4b7f3f" stroke-width="2.5" marker-end="url(#arrowSql)"/>
+  <line x1="758" y1="375" x2="622" y2="375" stroke="#4b7f3f" stroke-width="2.5" stroke-dasharray="6,5" marker-end="url(#arrowSql)"/>
+
+  <rect x="625" y="250" width="345" height="42" rx="6" fill="#eef6ea" stroke="#4b7f3f" stroke-width="1"/>
+  <text x="797" y="267" text-anchor="middle" font-size="12" font-weight="700" fill="#2c4d24">② SQL — consulta</text>
+  <text x="797" y="283" text-anchor="middle" font-size="10.5" fill="#2c4d24">resolverTasaVigente(banco, producto)</text>
+
+  <rect x="625" y="410" width="345" height="34" rx="6" fill="#eef6ea" stroke="#4b7f3f" stroke-width="1"/>
+  <text x="797" y="432" text-anchor="middle" font-size="12" font-weight="700" fill="#2c4d24">③ Fila — NUMERIC (tna real)</text>
+
+  <!-- ===== Arrows: Spring Boot <-> COBOL (la asimetria) ===== -->
+  <line x1="460" y1="412" x2="460" y2="558" stroke="#c2650a" stroke-width="3.5" marker-end="url(#arrowLine)"/>
+  <line x1="540" y1="558" x2="540" y2="412" stroke="#1d6fb8" stroke-width="3.5" stroke-dasharray="6,5" marker-end="url(#arrowJson)"/>
+
+  <rect x="30" y="450" width="345" height="76" rx="6" fill="#fff3e0" stroke="#c2650a" stroke-width="1.5"/>
+  <text x="202" y="471" text-anchor="middle" font-size="12" font-weight="700" fill="#7a3d05">④ stdin — línea delimitada (NO JSON)</text>
+  <text x="202" y="489" text-anchor="middle" font-size="11" fill="#7a3d05">"100000.00,12,61.000"</text>
+  <text x="202" y="505" text-anchor="middle" font-size="9.5" fill="#8a5320">GnuCOBOL no tiene JSON PARSE —</text>
+  <text x="202" y="518" text-anchor="middle" font-size="9.5" fill="#8a5320">parseo vía UNSTRING + FUNCTION NUMVAL</text>
+
+  <rect x="625" y="450" width="345" height="76" rx="6" fill="#eaf1fb" stroke="#1d6fb8" stroke-width="1.5"/>
+  <text x="797" y="471" text-anchor="middle" font-size="12" font-weight="700" fill="#0d3d63">⑤ stdout — JSON real (JSON GENERATE)</text>
+  <text x="797" y="489" text-anchor="middle" font-size="10" fill="#0d3d63">{"RES-CUOTA-MENSUAL":11335.59,</text>
+  <text x="797" y="502" text-anchor="middle" font-size="10" fill="#0d3d63">"RES-COD-ERROR":0, ...}</text>
+  <text x="797" y="517" text-anchor="middle" font-size="9.5" fill="#1a5686">NAME OF ... IS OMITTED → objeto plano</text>
+
+  <!-- ===== Legend ===== -->
+  <rect x="30" y="700" width="940" height="70" rx="8" fill="#fafafa" stroke="#999" stroke-width="1"/>
+  <text x="45" y="722" font-size="12.5" font-weight="700" fill="#1a1a1a">La asimetría del puente COBOL↔Java:</text>
+  <text x="45" y="741" font-size="11.5" fill="#333">entrada a COBOL (④, naranja) = texto plano delimitado por comas — GnuCOBOL no implementa JSON PARSE en ningún release real (verificado).</text>
+  <text x="45" y="758" font-size="11.5" fill="#333">salida de COBOL (⑤, azul) = JSON real vía JSON GENERATE. El cliente (①⑥) siempre habla JSON; la asimetría queda contenida adentro de la API.</text>
+</svg>
