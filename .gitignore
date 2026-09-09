@@ -1,0 +1,21 @@
+# GnuCOBOL build artifacts
+*.int
+*.gnt
+*.o
+*.so
+cobol/simloan
+cobol/*.exe
+
+# Java / Maven
+target/
+*.class
+
+# Docker
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Claude Code local session state
+.claude/
