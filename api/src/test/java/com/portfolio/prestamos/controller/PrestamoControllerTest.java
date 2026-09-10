@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -37,7 +38,7 @@ class PrestamoControllerTest {
     void devuelve200ConLaSimulacionCuandoLaSolicitudEsValida() throws Exception {
         when(prestamoSimulacionService.simularPrestamo(any())).thenReturn(new PrestamoSimulacionResponse(
                 new BigDecimal("10196.72"), new BigDecimal("122360.64"), new BigDecimal("22360.64"),
-                new BigDecimal("39.000"), "Banco Galicia", "Eminent"));
+                new BigDecimal("39.000"), "Banco Galicia", "Eminent", List.of()));
 
         PrestamoSimulacionRequest request = new PrestamoSimulacionRequest(
                 "Banco Galicia", "Eminent", new BigDecimal("100000.00"), 12);

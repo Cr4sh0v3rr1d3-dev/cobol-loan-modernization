@@ -14,11 +14,14 @@
 
        COPY LOANREQ.
        COPY LOANRES.
+       COPY LOANCUOTA.
 
        01  WS-TASA-MENSUAL            PIC 9V9(6) COMP-3.
        01  WS-FACTOR                  PIC 9V9(6) COMP-3.
        01  WS-FACTOR-N                PIC 9V9(6) COMP-3.
        01  WS-DENOMINADOR             PIC 9V9(6) COMP-3.
+       01  WS-SALDO-PENDIENTE         PIC 9(9)V99 COMP-3.
+       01  I                          PIC 9(3).
 
        01  WS-JSON-OUT                PIC X(500).
 
@@ -60,7 +63,31 @@
                NAME OF WS-LOAN-RESPONSE IS OMITTED
            DISPLAY FUNCTION TRIM(WS-JSON-OUT)
 
+           IF RES-COD-ERROR = 0
+               PERFORM GENERAR-TABLA-AMORTIZACION
+           END-IF
+
            STOP RUN.
+
+       GENERAR-TABLA-AMORTIZACION.
+           MOVE REQ-MONTO-SOLICITADO TO WS-SALDO-PENDIENTE
+
+           PERFORM VARYING I FROM 1 BY 1 UNTIL I > REQ-PLAZO-MESES
+               COMPUTE CUOTA-INTERES ROUNDED =
+                   WS-SALDO-PENDIENTE * WS-TASA-MENSUAL
+               COMPUTE CUOTA-AMORTIZACION ROUNDED =
+                   RES-CUOTA-MENSUAL - CUOTA-INTERES
+               COMPUTE WS-SALDO-PENDIENTE =
+                   WS-SALDO-PENDIENTE - CUOTA-AMORTIZACION
+               MOVE I TO CUOTA-NUMERO
+
+               MOVE SPACES TO WS-JSON-OUT
+               JSON GENERATE WS-JSON-OUT FROM WS-CUOTA-DETALLE
+                   NAME OF WS-CUOTA-DETALLE IS OMITTED
+               DISPLAY FUNCTION TRIM(WS-JSON-OUT)
+           END-PERFORM
+
+           EXIT PARAGRAPH.
 
        CALCULAR-CUOTA-FRANCES.
            COMPUTE WS-TASA-MENSUAL ROUNDED =

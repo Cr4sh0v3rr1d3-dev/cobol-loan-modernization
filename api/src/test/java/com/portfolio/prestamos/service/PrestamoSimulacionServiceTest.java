@@ -1,6 +1,7 @@
 package com.portfolio.prestamos.service;
 
 import com.portfolio.prestamos.cobol.SimuladorCobolProcess;
+import com.portfolio.prestamos.dto.CuotaCobolDetalle;
 import com.portfolio.prestamos.dto.PrestamoSimulacionRequest;
 import com.portfolio.prestamos.dto.PrestamoSimulacionResponse;
 import com.portfolio.prestamos.dto.SimuladorCobolResultado;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +49,8 @@ class PrestamoSimulacionServiceTest {
                 .thenReturn(Optional.of(tasa));
         when(simuladorCobolProcess.ejecutar(eq(new BigDecimal("100000.00")), eq(12), eq(new BigDecimal("39.000"))))
                 .thenReturn(new SimuladorCobolResultado(
-                        new BigDecimal("10196.72"), new BigDecimal("122360.64"), new BigDecimal("22360.64"), 0, " "));
+                        new BigDecimal("10196.72"), new BigDecimal("122360.64"), new BigDecimal("22360.64"), 0, " ",
+                        List.of(new CuotaCobolDetalle(1, new BigDecimal("3250.00"), new BigDecimal("6946.72")))));
 
         PrestamoSimulacionRequest request = new PrestamoSimulacionRequest(
                 "Banco Galicia", "Eminent", new BigDecimal("100000.00"), 12);
@@ -60,6 +63,8 @@ class PrestamoSimulacionServiceTest {
         assertThat(response.tasaAnualAplicada()).isEqualByComparingTo("39.000");
         assertThat(response.banco()).isEqualTo("Banco Galicia");
         assertThat(response.producto()).isEqualTo("Eminent");
+        assertThat(response.tablaAmortizacion()).hasSize(1);
+        assertThat(response.tablaAmortizacion().get(0).numero()).isEqualTo(1);
     }
 
     @Test
@@ -84,7 +89,7 @@ class PrestamoSimulacionServiceTest {
                 .thenReturn(Optional.of(tasa));
         when(simuladorCobolProcess.ejecutar(any(), anyInt(), any()))
                 .thenReturn(new SimuladorCobolResultado(
-                        BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 2, "Plazo invalido"));
+                        BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 2, "Plazo invalido", List.of()));
 
         PrestamoSimulacionRequest request = new PrestamoSimulacionRequest(
                 "Banco Macro", "Plan Sueldo", new BigDecimal("1000.00"), 500);

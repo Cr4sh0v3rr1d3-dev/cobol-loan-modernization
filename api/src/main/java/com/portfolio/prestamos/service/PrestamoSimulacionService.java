@@ -1,6 +1,7 @@
 package com.portfolio.prestamos.service;
 
 import com.portfolio.prestamos.cobol.SimuladorCobolProcess;
+import com.portfolio.prestamos.dto.CuotaAmortizacion;
 import com.portfolio.prestamos.dto.PrestamoSimulacionRequest;
 import com.portfolio.prestamos.dto.PrestamoSimulacionResponse;
 import com.portfolio.prestamos.dto.SimuladorCobolResultado;
@@ -9,6 +10,8 @@ import com.portfolio.prestamos.exception.NegocioException;
 import com.portfolio.prestamos.repository.TasaBancariaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class PrestamoSimulacionService {
@@ -39,7 +42,14 @@ public class PrestamoSimulacionService {
                 resultado.totalIntereses(),
                 tasaVigente.getTna(),
                 tasaVigente.getBanco(),
-                tasaVigente.getProducto());
+                tasaVigente.getProducto(),
+                mapearTabla(resultado));
+    }
+
+    private List<CuotaAmortizacion> mapearTabla(SimuladorCobolResultado resultado) {
+        return resultado.tablaAmortizacion().stream()
+                .map(cuota -> new CuotaAmortizacion(cuota.numero(), cuota.interes(), cuota.amortizacion()))
+                .toList();
     }
 
     private TasaBancaria resolverTasa(String banco, String producto) {

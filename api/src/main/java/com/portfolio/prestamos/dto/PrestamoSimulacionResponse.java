@@ -1,6 +1,7 @@
 package com.portfolio.prestamos.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record PrestamoSimulacionResponse(
         BigDecimal cuotaMensual,
@@ -8,6 +9,7 @@ public record PrestamoSimulacionResponse(
         BigDecimal totalIntereses,
         BigDecimal tasaAnualAplicada,
         String banco,
-        String producto
+        String producto,
+        List<CuotaAmortizacion> tablaAmortizacion
 ) {
 }

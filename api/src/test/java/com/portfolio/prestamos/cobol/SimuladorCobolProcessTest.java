@@ -57,6 +57,24 @@ class SimuladorCobolProcessTest {
     }
 
     @Test
+    void parseaLaTablaDeAmortizacionCuandoElMotorDevuelveLineasAdicionales(@TempDir Path tempDir) throws IOException {
+        String resumen = "{\"RES-CUOTA-MENSUAL\":10196.72,\"RES-TOTAL-A-PAGAR\":122360.64,"
+                + "\"RES-TOTAL-INTERESES\":22360.64,\"RES-COD-ERROR\":0,\"RES-MENSAJE-ERROR\":\" \"}";
+        String cuota1 = "{\"CUOTA-NUMERO\":1,\"CUOTA-INTERES\":3250.00,\"CUOTA-AMORTIZACION\":6946.72}";
+        String cuota2 = "{\"CUOTA-NUMERO\":2,\"CUOTA-INTERES\":3024.98,\"CUOTA-AMORTIZACION\":7171.74}";
+        Path script = crearScriptMock(tempDir, resumen, cuota1, cuota2);
+        SimuladorCobolProcess proceso = new SimuladorCobolProcess(script.toString(), objectMapper);
+
+        SimuladorCobolResultado resultado = proceso.ejecutar(
+                new BigDecimal("100000.00"), 12, new BigDecimal("39.000"));
+
+        assertThat(resultado.tablaAmortizacion()).hasSize(2);
+        assertThat(resultado.tablaAmortizacion().get(0).numero()).isEqualTo(1);
+        assertThat(resultado.tablaAmortizacion().get(0).interes()).isEqualByComparingTo("3250.00");
+        assertThat(resultado.tablaAmortizacion().get(1).amortizacion()).isEqualByComparingTo("7171.74");
+    }
+
+    @Test
     void lanzaSimulacionCobolExceptionCuandoElExecutableNoExiste(@TempDir Path tempDir) {
         Path inexistente = tempDir.resolve("no-existe-simloan");
         SimuladorCobolProcess proceso = new SimuladorCobolProcess(inexistente.toString(), objectMapper);
@@ -65,14 +83,22 @@ class SimuladorCobolProcessTest {
                 .isInstanceOf(SimulacionCobolException.class);
     }
 
-    private Path crearScriptMock(Path dir, String jsonSalida) throws IOException {
+    private Path crearScriptMock(Path dir, String... lineasSalida) throws IOException {
         if (esWindows()) {
             Path script = dir.resolve("mock-simloan.cmd");
-            Files.writeString(script, "@echo off\r\nset /p linea=\r\necho " + jsonSalida + "\r\n");
+            StringBuilder contenido = new StringBuilder("@echo off\r\nset /p linea=\r\n");
+            for (String linea : lineasSalida) {
+                contenido.append("echo ").append(linea).append("\r\n");
+            }
+            Files.writeString(script, contenido.toString());
             return script;
         }
         Path script = dir.resolve("mock-simloan.sh");
-        Files.writeString(script, "#!/bin/sh\nread linea\necho '" + jsonSalida + "'\n");
+        StringBuilder contenido = new StringBuilder("#!/bin/sh\nread linea\n");
+        for (String linea : lineasSalida) {
+            contenido.append("echo '").append(linea).append("'\n");
+        }
+        Files.writeString(script, contenido.toString());
         if (!script.toFile().setExecutable(true)) {
             throw new IOException("No se pudo marcar el script mock como ejecutable: " + script);
         }

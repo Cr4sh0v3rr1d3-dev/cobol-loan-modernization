@@ -1,5 +1,6 @@
 package com.portfolio.prestamos.cobol;
 
+import com.portfolio.prestamos.dto.CuotaCobolDetalle;
 import com.portfolio.prestamos.dto.SimuladorCobolResultado;
 import com.portfolio.prestamos.exception.SimulacionCobolException;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -39,7 +41,7 @@ public class SimuladorCobolProcess {
         Process proceso = iniciarProceso();
         try {
             escribirEntrada(proceso, lineaEntrada);
-            String salida = leerSalida(proceso);
+            List<String> salida = leerSalida(proceso);
             esperarFinalizacion(proceso);
             return parsearSalida(salida);
         } finally {
@@ -67,9 +69,9 @@ public class SimuladorCobolProcess {
         }
     }
 
-    private String leerSalida(Process proceso) {
+    private List<String> leerSalida(Process proceso) {
         try (var reader = new BufferedReader(new InputStreamReader(proceso.getInputStream(), StandardCharsets.UTF_8))) {
-            return reader.readLine();
+            return reader.lines().toList();
         } catch (IOException e) {
             throw new SimulacionCobolException("No se pudo leer la respuesta del motor de calculo COBOL", e);
         }
@@ -88,14 +90,24 @@ public class SimuladorCobolProcess {
         }
     }
 
-    private SimuladorCobolResultado parsearSalida(String salida) {
-        if (salida == null || salida.isBlank()) {
+    private SimuladorCobolResultado parsearSalida(List<String> salida) {
+        if (salida.isEmpty()) {
             throw new SimulacionCobolException("El motor de calculo COBOL no devolvio resultado");
         }
+        SimuladorCobolResultado resumen;
         try {
-            return objectMapper.readValue(salida, SimuladorCobolResultado.class);
+            resumen = objectMapper.readValue(salida.get(0), SimuladorCobolResultado.class);
         } catch (JacksonException e) {
-            throw new SimulacionCobolException("La respuesta del motor de calculo COBOL no es JSON valido: " + salida, e);
+            throw new SimulacionCobolException(
+                    "La respuesta del motor de calculo COBOL no es JSON valido: " + salida.get(0), e);
         }
+        if (salida.size() == 1) {
+            return resumen;
+        }
+        List<CuotaCobolDetalle> tabla = salida.stream()
+                .skip(1)
+                .map(linea -> objectMapper.readValue(linea, CuotaCobolDetalle.class))
+                .toList();
+        return resumen.conTabla(tabla);
     }
 }
