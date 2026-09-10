@@ -4,7 +4,9 @@ Simulador de préstamos con sistema de amortización francés. Demuestra un patr
 
 ## Arquitectura
 
-![Diagrama de arquitectura — flujo real de POST /api/v1/prestamos/simular](docs/arquitectura-flujo.svg)
+![Diagrama de secuencia — flujo real de POST /api/v1/prestamos/simular](docs/prestamo-simulacion-sequence.svg)
+
+Versión interactiva (pan/zoom, tema claro/oscuro, trace): [`docs/prestamo-simulacion-sequence.html`](docs/prestamo-simulacion-sequence.html). Fuente editable: [`docs/prestamo-simulacion.sequence.json`](docs/prestamo-simulacion.sequence.json).
 
 - **`cobol/`** — `SIMLOAN.cbl` + copybooks. Recibe `monto,plazo,tasa` por stdin (línea de texto, no JSON — ver más abajo), calcula la cuota por sistema francés, devuelve JSON plano por stdout. Sin acceso a datos: la tasa siempre llega resuelta desde afuera.
 - **`api/`** — Spring Boot (Maven). Único endpoint `POST /api/v1/prestamos/simular`. Resuelve la tasa vigente en Postgres, invoca el proceso COBOL vía `ProcessBuilder`, mapea la respuesta. `BigDecimal` en todo el borde monetario.
