@@ -40,6 +40,8 @@ curl -X POST http://localhost:8080/api/v1/prestamos/simular \
   -d '{"banco":"Banco Macro","producto":"Plan Sueldo","montoSolicitado":100000.00,"plazoMeses":12}'
 ```
 
+Documentación interactiva del endpoint (OpenAPI/Swagger, generada desde el código real): [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
+
 ## Tests
 
 ```bash
